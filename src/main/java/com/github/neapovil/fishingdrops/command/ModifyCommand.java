@@ -27,6 +27,7 @@ import net.kyori.adventure.text.Component;
 
 public class ModifyCommand implements ICommand
 {
+    @Override
     public void register()
     {
         final List<Argument<?>> arguments = new ArrayList<>();

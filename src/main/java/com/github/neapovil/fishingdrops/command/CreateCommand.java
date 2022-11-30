@@ -15,6 +15,7 @@ import dev.jorel.commandapi.arguments.StringArgument;
 
 public class CreateCommand implements ICommand
 {
+    @Override
     public void register()
     {
         new CommandAPICommand("fishingdrops")
