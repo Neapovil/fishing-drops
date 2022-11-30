@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang3.EnumUtils;
 import org.bukkit.block.Biome;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -16,12 +15,11 @@ import com.github.neapovil.fishingdrops.object.WeightedItem;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.Argument;
-import dev.jorel.commandapi.arguments.ArgumentSuggestions;
+import dev.jorel.commandapi.arguments.BiomeArgument;
 import dev.jorel.commandapi.arguments.ItemStackArgument;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.MultiLiteralArgument;
 import dev.jorel.commandapi.arguments.SafeSuggestions;
-import dev.jorel.commandapi.arguments.StringArgument;
 import dev.jorel.commandapi.exceptions.WrapperCommandSyntaxException;
 import net.kyori.adventure.text.Component;
 
@@ -33,15 +31,13 @@ public class ModifyCommand implements ICommand
         final List<Argument<?>> arguments = new ArrayList<>();
 
         arguments.add(new LiteralArgument("modify"));
-        arguments.add(new StringArgument("biome").replaceSuggestions(ArgumentSuggestions.strings(info -> {
+        arguments.add(new BiomeArgument("biome").replaceSafeSuggestions(SafeSuggestions.suggest(info -> {
             final FishingDrops plugin = FishingDrops.getInstance();
 
             return Arrays.asList(Biome.values())
                     .stream()
-                    .filter(i -> !i.equals(Biome.CUSTOM))
                     .filter(i -> plugin.getDropsManager().hasBiome(i))
-                    .map(i -> i.toString())
-                    .toArray(String[]::new);
+                    .toArray(Biome[]::new);
         })));
 
         new CommandAPICommand("fishingdrops")
@@ -64,16 +60,11 @@ public class ModifyCommand implements ICommand
                 .withArguments(arguments)
                 .withArguments(new MultiLiteralArgument("removeDrop"))
                 .withArguments(new ItemStackArgument("itemstack").replaceSafeSuggestions(SafeSuggestions.suggest(info -> {
+                    final Biome biome = (Biome) info.previousArgs()[0];
+
                     final FishingDrops plugin = FishingDrops.getInstance();
 
-                    final String biomestring = (String) info.previousArgs()[0];
-
-                    if (!EnumUtils.isValidEnum(Biome.class, biomestring.toUpperCase()))
-                    {
-                        return new ItemStack[] {};
-                    }
-
-                    return plugin.getDropsManager().getDropsByBiome(Biome.valueOf(biomestring))
+                    return plugin.getDropsManager().getDropsByBiome(biome)
                             .stream()
                             .map(i -> i.getItemStack()) // fix this
                             .toArray(ItemStack[]::new);
@@ -84,14 +75,7 @@ public class ModifyCommand implements ICommand
 
     private void run(CommandSender sender, Object[] args) throws WrapperCommandSyntaxException
     {
-        final String biomestring = ((String) args[0]).toUpperCase();
-
-        if (!EnumUtils.isValidEnum(Biome.class, biomestring))
-        {
-            throw CommandAPI.fail("This biome doesn't exist!");
-        }
-
-        final Biome biome = Biome.valueOf(biomestring);
+        final Biome biome = (Biome) args[0];
 
         if (biome.equals(Biome.CUSTOM))
         {

@@ -126,6 +126,7 @@ public class DropsManager
 
             final byte[] bytes = Base64.getDecoder().decode(bytestring);
             final ItemStack itemstack = ItemStack.deserializeBytes(bytes);
+
             return itemstack.equals(itemStack);
         });
 
