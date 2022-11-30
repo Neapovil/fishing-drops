@@ -11,11 +11,15 @@ compileJava.options.encoding = "UTF-8"
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 repositories {
+  maven { url "https://repo.codemc.org/repository/maven-public/" }
+  maven { url "https://jitpack.io" }
   mavenCentral()
 }
 
 dependencies {
   paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.18.2-R0.1-SNAPSHOT")
+  
+  compileOnly group: "dev.jorel", name: "commandapi-core", version: "8.5.1"
   
   implementation group: "com.electronwill.night-config", name:"json", version: "3.6.6"
 }
