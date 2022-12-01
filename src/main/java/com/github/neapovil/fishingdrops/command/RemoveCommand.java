@@ -12,14 +12,14 @@ import dev.jorel.commandapi.arguments.BiomeArgument;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.SafeSuggestions;
 
-public class DeleteCommand implements ICommand
+public class RemoveCommand implements ICommand
 {
     @Override
     public void register()
     {
-        new CommandAPICommand("fishingdrops")
-                .withPermission("fishingdrops.command.admin")
-                .withArguments(new LiteralArgument("delete"))
+        new CommandAPICommand(this.commandName())
+                .withPermission(this.permission())
+                .withArguments(new LiteralArgument("remove"))
                 .withArguments(new BiomeArgument("biome").replaceSafeSuggestions(SafeSuggestions.suggest(info -> {
                     final FishingDrops plugin = FishingDrops.getInstance();
 
@@ -35,7 +35,7 @@ public class DeleteCommand implements ICommand
 
                     if (!plugin.getDropsManager().hasBiome(biome))
                     {
-                        throw CommandAPI.fail("This biome is not managed!");
+                        throw CommandAPI.fail("Add the biome first before trying to edit its loot table!");
                     }
 
                     plugin.getDropsManager().delete(biome);

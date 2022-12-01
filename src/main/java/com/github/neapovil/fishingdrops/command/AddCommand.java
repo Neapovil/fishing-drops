@@ -2,44 +2,34 @@ package com.github.neapovil.fishingdrops.command;
 
 import java.util.Arrays;
 
-import org.apache.commons.lang3.EnumUtils;
 import org.bukkit.block.Biome;
 
 import com.github.neapovil.fishingdrops.FishingDrops;
 
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
-import dev.jorel.commandapi.arguments.ArgumentSuggestions;
+import dev.jorel.commandapi.arguments.BiomeArgument;
 import dev.jorel.commandapi.arguments.LiteralArgument;
-import dev.jorel.commandapi.arguments.StringArgument;
+import dev.jorel.commandapi.arguments.SafeSuggestions;
 
-public class CreateCommand implements ICommand
+public class AddCommand implements ICommand
 {
     @Override
     public void register()
     {
-        new CommandAPICommand("fishingdrops")
-                .withPermission("fishingdrops.command.admin")
-                .withArguments(new LiteralArgument("create"))
-                .withArguments(new StringArgument("biome").replaceSuggestions(ArgumentSuggestions.strings(info -> {
+        new CommandAPICommand(this.commandName())
+                .withPermission(this.permission())
+                .withArguments(new LiteralArgument("add"))
+                .withArguments(new BiomeArgument("biome").replaceSafeSuggestions(SafeSuggestions.suggest(info -> {
                     final FishingDrops plugin = FishingDrops.getInstance();
 
                     return Arrays.asList(Biome.values())
                             .stream()
-                            .filter(i -> !i.equals(Biome.CUSTOM))
                             .filter(i -> !plugin.getDropsManager().hasBiome(i))
-                            .map(i -> i.toString())
-                            .toArray(String[]::new);
+                            .toArray(Biome[]::new);
                 })))
                 .executes((sender, args) -> {
-                    final String biomestring = ((String) args[0]).toUpperCase();
-
-                    if (!EnumUtils.isValidEnum(Biome.class, biomestring))
-                    {
-                        throw CommandAPI.fail("This biome doesn't exist!");
-                    }
-
-                    final Biome biome = Biome.valueOf(biomestring);
+                    final Biome biome = (Biome) args[0];
 
                     if (biome.equals(Biome.CUSTOM))
                     {
@@ -55,7 +45,7 @@ public class CreateCommand implements ICommand
 
                     plugin.getDropsManager().create(biome);
 
-                    sender.sendMessage("Biome drops created.");
+                    sender.sendMessage("New biome added: " + biome.toString());
                 })
                 .register();
     }

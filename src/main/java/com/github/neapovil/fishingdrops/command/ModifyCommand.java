@@ -40,23 +40,23 @@ public class ModifyCommand implements ICommand
                     .toArray(Biome[]::new);
         })));
 
-        new CommandAPICommand("fishingdrops")
-                .withPermission("fishingdrops.command.admin")
+        new CommandAPICommand(this.commandName())
+                .withPermission(this.permission())
                 .withArguments(arguments)
                 .withArguments(new MultiLiteralArgument("addDropFromHand"))
                 .executes(this::run)
                 .register();
 
-        new CommandAPICommand("fishingdrops")
-                .withPermission("fishingdrops.command.admin")
+        new CommandAPICommand(this.commandName())
+                .withPermission(this.permission())
                 .withArguments(arguments)
                 .withArguments(new MultiLiteralArgument("addDrop"))
                 .withArguments(new ItemStackArgument("itemstack"))
                 .executes(this::run)
                 .register();
 
-        new CommandAPICommand("fishingdrops")
-                .withPermission("fishingdrops.command.admin")
+        new CommandAPICommand(this.commandName())
+                .withPermission(this.permission())
                 .withArguments(arguments)
                 .withArguments(new MultiLiteralArgument("removeDrop"))
                 .withArguments(new ItemStackArgument("itemstack").replaceSafeSuggestions(SafeSuggestions.suggest(info -> {
