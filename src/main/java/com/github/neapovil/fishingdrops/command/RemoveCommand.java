@@ -38,7 +38,7 @@ public class RemoveCommand implements ICommand
                         throw CommandAPI.fail("Add the biome first before trying to edit its loot table!");
                     }
 
-                    plugin.getDropsManager().delete(biome);
+                    plugin.getDropsManager().remove(biome);
 
                     sender.sendMessage("Biome deleted: " + biome.toString());
                 })

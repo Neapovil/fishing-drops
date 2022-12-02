@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
+import org.apache.commons.lang3.Range;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
 import org.bukkit.inventory.ItemStack;
@@ -65,21 +66,48 @@ public class DropsManager
         return this.fileConfig.get("drops." + biome.toString()) != null;
     }
 
-    public void create(Biome biome)
+    public OperationStatus add(Biome biome)
     {
+        if (this.hasBiome(biome))
+        {
+            return OperationStatus.NOTHING_TO_ADD;
+        }
+
         this.fileConfig.set("drops." + biome.toString(), new ArrayList<>());
+
+        return OperationStatus.SUCCESS;
     }
 
-    public void delete(Biome biome)
-    {
-        this.fileConfig.remove("drops." + biome.toString());
-    }
-
-    public void addDrop(Biome biome, ItemStack itemStack, boolean customItemStack)
+    public OperationStatus remove(Biome biome)
     {
         if (!this.hasBiome(biome))
         {
-            return;
+            return OperationStatus.NO_BIOME;
+        }
+
+        this.fileConfig.remove("drops." + biome.toString());
+
+        return OperationStatus.SUCCESS;
+    }
+
+    public OperationStatus addDrop(Biome biome, ItemStack itemStack, boolean customItemStack)
+    {
+        if (!this.hasBiome(biome))
+        {
+            return OperationStatus.NO_BIOME;
+        }
+
+        final boolean flag = !customItemStack &&
+                this.getDropsByBiome(biome).stream().anyMatch(i -> i.getItemStack().equals(itemStack));
+
+        if (flag)
+        {
+            return OperationStatus.NOTHING_TO_ADD;
+        }
+
+        if (itemStack.getType().isAir())
+        {
+            return OperationStatus.ITEMSTACK_IS_AIR;
         }
 
         final List<UnmodifiableConfig> drops = this.fileConfig.get("drops." + biome.toString());
@@ -103,18 +131,20 @@ public class DropsManager
         drops.add(config);
 
         this.fileConfig.set("drops." + biome.toString(), drops);
+
+        return OperationStatus.SUCCESS;
     }
 
-    public void removeDrop(Biome biome, ItemStack itemStack)
+    public OperationStatus removeDropByItemStack(Biome biome, ItemStack itemStack)
     {
         if (!this.hasBiome(biome))
         {
-            return;
+            return OperationStatus.NO_BIOME;
         }
 
         final List<UnmodifiableConfig> drops = this.fileConfig.get("drops." + biome.toString());
 
-        drops.removeIf(i -> {
+        final boolean removed = drops.removeIf(i -> {
             final String bytestring = (String) i.get("item");
 
             if (bytestring.isEmpty())
@@ -131,5 +161,33 @@ public class DropsManager
         });
 
         this.fileConfig.set("drops." + biome.toString(), drops);
+
+        return removed ? OperationStatus.SUCCESS : OperationStatus.NOTHING_TO_REMOVE;
+    }
+
+    public OperationStatus removeDropByIndex(Biome biome, int index)
+    {
+        if (!this.hasBiome(biome))
+        {
+            return OperationStatus.NO_BIOME;
+        }
+
+        final List<UnmodifiableConfig> drops = this.fileConfig.get("drops." + biome.toString());
+
+        if (!Range.between(0, drops.size() - 1).contains(index))
+        {
+            return OperationStatus.NOTHING_TO_REMOVE;
+        }
+
+        drops.remove(index);
+
+        this.fileConfig.set("drops." + biome.toString(), drops);
+
+        return OperationStatus.SUCCESS;
+    }
+
+    public enum OperationStatus
+    {
+        SUCCESS, NO_BIOME, NOTHING_TO_ADD, NOTHING_TO_REMOVE, ITEMSTACK_IS_AIR
     }
 }

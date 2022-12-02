@@ -5,6 +5,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.electronwill.nightconfig.core.file.FileConfig;
 import com.github.neapovil.fishingdrops.command.AddCommand;
 import com.github.neapovil.fishingdrops.command.RemoveCommand;
+import com.github.neapovil.fishingdrops.command.ViewCommand;
 import com.github.neapovil.fishingdrops.command.ModifyCommand;
 import com.github.neapovil.fishingdrops.listener.Listener;
 import com.github.neapovil.fishingdrops.manager.DropsManager;
@@ -33,6 +34,7 @@ public class FishingDrops extends JavaPlugin
         new AddCommand().register();
         new ModifyCommand().register();
         new RemoveCommand().register();
+        new ViewCommand().register();
     }
 
     @Override

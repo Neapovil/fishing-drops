@@ -8,10 +8,13 @@ import org.bukkit.Location;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.inventory.ItemStack;
 
 import com.github.neapovil.fishingdrops.FishingDrops;
+import com.github.neapovil.fishingdrops.Keys;
 import com.github.neapovil.fishingdrops.object.WeightedItem;
 
 public class Listener implements org.bukkit.event.Listener
@@ -54,5 +57,23 @@ public class Listener implements org.bukkit.event.Listener
         final Item item = (Item) event.getCaught();
 
         item.setItemStack(itemstack);
+    }
+
+    @EventHandler
+    private void viewCommandInventoryClick(InventoryClickEvent event)
+    {
+        if (event.getWhoClicked().getPersistentDataContainer().has(Keys.VIEW_COMMAND.namespacedKey()))
+        {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    private void viewCommandInventoryClose(InventoryCloseEvent event)
+    {
+        if (event.getPlayer().getPersistentDataContainer().has(Keys.VIEW_COMMAND.namespacedKey()))
+        {
+            event.getPlayer().getPersistentDataContainer().remove(Keys.VIEW_COMMAND.namespacedKey());
+        }
     }
 }

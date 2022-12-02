@@ -3,6 +3,7 @@ package com.github.neapovil.fishingdrops.command;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import org.bukkit.block.Biome;
 import org.bukkit.command.CommandSender;
@@ -10,12 +11,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import com.github.neapovil.fishingdrops.FishingDrops;
-import com.github.neapovil.fishingdrops.object.WeightedItem;
+import com.github.neapovil.fishingdrops.manager.DropsManager.OperationStatus;
 
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.Argument;
 import dev.jorel.commandapi.arguments.BiomeArgument;
+import dev.jorel.commandapi.arguments.IntegerArgument;
 import dev.jorel.commandapi.arguments.ItemStackArgument;
 import dev.jorel.commandapi.arguments.LiteralArgument;
 import dev.jorel.commandapi.arguments.MultiLiteralArgument;
@@ -25,6 +27,8 @@ import net.kyori.adventure.text.Component;
 
 public class ModifyCommand implements ICommand
 {
+    private final FishingDrops plugin = FishingDrops.getInstance();
+
     @Override
     public void register()
     {
@@ -32,8 +36,6 @@ public class ModifyCommand implements ICommand
 
         arguments.add(new LiteralArgument("modify"));
         arguments.add(new BiomeArgument("biome").replaceSafeSuggestions(SafeSuggestions.suggest(info -> {
-            final FishingDrops plugin = FishingDrops.getInstance();
-
             return Arrays.asList(Biome.values())
                     .stream()
                     .filter(i -> plugin.getDropsManager().hasBiome(i))
@@ -59,15 +61,11 @@ public class ModifyCommand implements ICommand
                 .withPermission(this.permission())
                 .withArguments(arguments)
                 .withArguments(new MultiLiteralArgument("removeDrop"))
-                .withArguments(new ItemStackArgument("itemstack").replaceSafeSuggestions(SafeSuggestions.suggest(info -> {
+                .withArguments(new IntegerArgument("index", 0).replaceSafeSuggestions(SafeSuggestions.suggest(info -> {
                     final Biome biome = (Biome) info.previousArgs()[0];
+                    final int dropsize = plugin.getDropsManager().getDropsByBiome(biome).size();
 
-                    final FishingDrops plugin = FishingDrops.getInstance();
-
-                    return plugin.getDropsManager().getDropsByBiome(biome)
-                            .stream()
-                            .map(i -> i.getItemStack()) // fix this
-                            .toArray(ItemStack[]::new);
+                    return IntStream.range(0, dropsize).boxed().toArray(Integer[]::new);
                 })))
                 .executes(this::run)
                 .register();
@@ -82,8 +80,6 @@ public class ModifyCommand implements ICommand
             throw CommandAPI.fail("Custom biomes are not supported yet!");
         }
 
-        final FishingDrops plugin = FishingDrops.getInstance();
-
         if (!plugin.getDropsManager().hasBiome(biome))
         {
             throw CommandAPI.fail("This biome is not available for customization!");
@@ -91,51 +87,59 @@ public class ModifyCommand implements ICommand
 
         final String operation = (String) args[1];
 
-        ItemStack itemstack;
-
-        if (args.length == 3)
-        {
-            itemstack = (ItemStack) args[2];
-        }
-        else
+        if (operation.equals("addDropFromHand"))
         {
             if (!(sender instanceof Player))
             {
-                throw CommandAPI.fail("Only players can use this command!");
+                throw CommandAPI.fail("Only players can run this command!");
             }
 
-            itemstack = ((Player) sender).getInventory().getItemInMainHand();
+            final ItemStack itemstack = ((Player) sender).getInventory().getItemInMainHand();
+
+            final OperationStatus status = plugin.getDropsManager().addDrop(biome, itemstack, true);
+
+            if (status.equals(OperationStatus.SUCCESS))
+            {
+                sender.sendMessage(Component.text("Custom item added: ").append(itemstack.displayName()));
+            }
+            else
+            {
+                throw CommandAPI.fail("Item can't be added. Be sure that its not a duplicate or air.");
+            }
         }
 
-        final List<WeightedItem> drops = plugin.getDropsManager().getDropsByBiome(biome);
-
-        if (operation.equalsIgnoreCase("addDrop") || operation.equalsIgnoreCase("addDropFromHand"))
+        if (operation.equals("addDrop"))
         {
-            if (drops.stream().anyMatch(i -> i.getItemStack().equals(itemstack)))
+            final ItemStack itemstack = (ItemStack) args[2];
+
+            final OperationStatus status = plugin.getDropsManager().addDrop(biome, itemstack, false);
+
+            if (status.equals(OperationStatus.SUCCESS))
             {
-                throw CommandAPI.fail("This itemstack is already in the drop table!");
+                sender.sendMessage(Component.text("Generic item added: ").append(itemstack.displayName()));
             }
-
-            if (itemstack.getType().isAir())
+            else
             {
-                throw CommandAPI.fail("You can't add AIR into the loot table!");
+                throw CommandAPI.fail("Item can't be added. Be sure that its not a duplicate or air.");
             }
-
-            plugin.getDropsManager().addDrop(biome, itemstack, operation.equalsIgnoreCase("addDropFromHand") ? true : false);
-
-            sender.sendMessage(Component.text("New item added to the drop table: ").append(itemstack.displayName()));
         }
 
-        if (operation.equalsIgnoreCase("removeDrop"))
+        if (operation.equals("removeDrop"))
         {
-            if (drops.stream().noneMatch(i -> i.getItemStack().equals(itemstack)))
+            final int index = (int) args[2];
+
+            final OperationStatus status = plugin.getDropsManager().removeDropByIndex(biome, index);
+
+            plugin.getDropsManager().getDropsByBiome(biome);
+
+            if (status.equals(OperationStatus.SUCCESS))
             {
-                throw CommandAPI.fail("This ItemStack is not in the drop table!");
+                sender.sendMessage(Component.text("Item index removed: " + index));
             }
-
-            plugin.getDropsManager().removeDrop(biome, itemstack);
-
-            sender.sendMessage(Component.text("Item removed from the drop table: ").append(itemstack.displayName()));
+            else
+            {
+                throw CommandAPI.fail("Item can't be removed. Be sure it exist.");
+            }
         }
     }
 }
