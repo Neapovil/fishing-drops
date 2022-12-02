@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import com.github.neapovil.fishingdrops.FishingDrops;
+import com.github.neapovil.fishingdrops.object.WeightedItem;
 
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
@@ -127,18 +128,16 @@ public class ModifyCommand implements ICommand
         {
             final int index = (int) args[2];
 
-            final boolean status = plugin.getDropsManager().removeDropByIndex(biome, index);
+            final List<WeightedItem> drops = plugin.getDropsManager().getDropsByBiome(biome);
 
-            plugin.getDropsManager().getDropsByBiome(biome);
-
-            if (status)
-            {
-                sender.sendMessage(Component.text("Item index removed: " + index));
-            }
-            else
+            if (index >= drops.size())
             {
                 throw CommandAPI.fail("Item can't be removed. Be sure it exist.");
             }
+
+            plugin.getDropsManager().removeDropByIndex(biome, index);
+
+            sender.sendMessage(Component.text("Item removed: ").append(drops.get(index).getItemStack().displayName()));
         }
     }
 }

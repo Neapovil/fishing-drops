@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
-import org.apache.commons.lang3.Range;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
 import org.bukkit.inventory.ItemStack;
@@ -174,7 +173,7 @@ public class DropsManager
 
         final List<UnmodifiableConfig> drops = this.fileConfig.get("drops." + biome.toString());
 
-        if (!Range.between(0, drops.size() - 1).contains(index))
+        if (index >= drops.size())
         {
             return false;
         }
