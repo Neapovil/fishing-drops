@@ -137,7 +137,7 @@ public class ModifyCommand implements ICommand
 
             plugin.getDropsManager().removeDropByIndex(biome, index);
 
-            sender.sendMessage(Component.text("Item removed: ").append(drops.get(index).getItemStack().displayName()));
+            sender.sendMessage(Component.text("Item removed: ").append(drops.get(index).itemStack().displayName()));
         }
     }
 }

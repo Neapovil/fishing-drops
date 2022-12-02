@@ -10,7 +10,7 @@ public class Keys<T, Z>
     private final String key;
     private final PersistentDataType<T, Z> type;
 
-    public Keys(String key, PersistentDataType<T, Z> type)
+    private Keys(String key, PersistentDataType<T, Z> type)
     {
         this.key = key;
         this.type = type;

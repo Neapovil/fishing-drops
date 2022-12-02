@@ -39,20 +39,20 @@ public class Listener implements org.bukkit.event.Listener
             return;
         }
 
-        items.sort(Comparator.comparingInt(WeightedItem::getWeight));
+        items.sort(Comparator.comparingInt(WeightedItem::weight));
 
-        final int weight = items.stream().map(i -> i.getWeight()).reduce(1, Integer::sum);
+        final int weight = items.stream().map(i -> i.weight()).reduce(1, Integer::sum);
         final Random random = new Random();
         final int rolledweight = random.nextInt(1, weight);
 
         final WeightedItem weighteditem = items.stream()
-                .filter(i -> rolledweight <= i.getWeight())
+                .filter(i -> rolledweight <= i.weight())
                 .findAny()
                 .orElse(items.get(items.size() - 1));
 
-        final ItemStack itemstack = weighteditem.getItemStack();
+        final ItemStack itemstack = weighteditem.itemStack();
 
-        itemstack.setAmount(random.nextInt(weighteditem.getMinCount(), weighteditem.getMaxCount() + 1));
+        itemstack.setAmount(random.nextInt(weighteditem.minCount(), weighteditem.maxCount() + 1));
 
         final Item item = (Item) event.getCaught();
 

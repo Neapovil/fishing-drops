@@ -8,12 +8,20 @@ public class WeightedItem
 {
     @Nullable
     private ItemStack itemStack;
-    private Material material;
-    private int weight;
-    private int minCount;
-    private int maxCount;
+    private final Material material;
+    private final int weight;
+    private final int minCount;
+    private final int maxCount;
 
-    public ItemStack getItemStack()
+    public WeightedItem(Material material, int weight, int minCount, int maxCount)
+    {
+        this.material = material;
+        this.weight = weight;
+        this.minCount = minCount;
+        this.maxCount = maxCount;
+    }
+
+    public ItemStack itemStack()
     {
         ItemStack itemstack = this.itemStack;
 
@@ -25,48 +33,28 @@ public class WeightedItem
         return itemstack;
     }
 
-    public Material getMaterial()
-    {
-        return this.material;
-    }
-
-    public int getWeight()
-    {
-        return this.weight;
-    }
-
-    public int getMinCount()
-    {
-        return this.minCount;
-    }
-
-    public int getMaxCount()
-    {
-        return this.maxCount;
-    }
-
-    public void setItemStack(ItemStack itemStack)
+    public void itemStack(ItemStack itemStack)
     {
         this.itemStack = itemStack;
     }
 
-    public void setMaterial(Material material)
+    public Material material()
     {
-        this.material = material;
+        return this.material;
     }
 
-    public void setWeight(int weight)
+    public int weight()
     {
-        this.weight = weight;
+        return this.weight;
     }
 
-    public void setMinCount(int minCount)
+    public int minCount()
     {
-        this.minCount = minCount;
+        return this.minCount;
     }
 
-    public void setMaxCount(int maxCount)
+    public int maxCount()
     {
-        this.maxCount = maxCount;
+        return this.maxCount;
     }
 }

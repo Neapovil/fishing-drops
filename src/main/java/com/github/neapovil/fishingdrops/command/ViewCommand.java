@@ -51,7 +51,7 @@ public class ViewCommand implements ICommand
 
                     final List<ItemStack> items = plugin.getDropsManager().getDropsByBiome(biome)
                             .stream()
-                            .map(i -> i.getItemStack())
+                            .map(i -> i.itemStack())
                             .toList();
 
                     for (int i = 0; i < items.size(); i++)

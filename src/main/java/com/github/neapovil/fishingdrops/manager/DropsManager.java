@@ -38,20 +38,15 @@ public class DropsManager
                 final int countmin = i.getInt("count.min");
                 final int countmax = i.getInt("count.max");
 
-                final WeightedItem weighteditem = new WeightedItem();
+                final WeightedItem weighteditem = new WeightedItem(Material.getMaterial(material), weight, countmin, countmax);
 
                 try
                 {
-                    weighteditem.setItemStack(ItemStack.deserializeBytes(Base64.getDecoder().decode(item)));
+                    weighteditem.itemStack(ItemStack.deserializeBytes(Base64.getDecoder().decode(item)));
                 }
                 catch (Exception e)
                 {
                 }
-
-                weighteditem.setMaterial(Material.getMaterial(material));
-                weighteditem.setWeight(weight);
-                weighteditem.setMinCount(countmin);
-                weighteditem.setMaxCount(countmax);
 
                 drops.add(weighteditem);
             }
@@ -97,7 +92,7 @@ public class DropsManager
         }
 
         final boolean flag = !customItemStack &&
-                this.getDropsByBiome(biome).stream().anyMatch(i -> i.getItemStack().equals(itemStack));
+                this.getDropsByBiome(biome).stream().anyMatch(i -> i.itemStack().equals(itemStack));
 
         if (flag)
         {
