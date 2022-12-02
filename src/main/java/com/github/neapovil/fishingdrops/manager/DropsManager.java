@@ -66,35 +66,35 @@ public class DropsManager
         return this.fileConfig.get("drops." + biome.toString()) != null;
     }
 
-    public OperationStatus add(Biome biome)
+    public boolean add(Biome biome)
     {
         if (this.hasBiome(biome))
         {
-            return OperationStatus.NOTHING_TO_ADD;
+            return false;
         }
 
         this.fileConfig.set("drops." + biome.toString(), new ArrayList<>());
 
-        return OperationStatus.SUCCESS;
+        return true;
     }
 
-    public OperationStatus remove(Biome biome)
+    public boolean remove(Biome biome)
     {
         if (!this.hasBiome(biome))
         {
-            return OperationStatus.NO_BIOME;
+            return false;
         }
 
         this.fileConfig.remove("drops." + biome.toString());
 
-        return OperationStatus.SUCCESS;
+        return true;
     }
 
-    public OperationStatus addDrop(Biome biome, ItemStack itemStack, boolean customItemStack)
+    public boolean addDrop(Biome biome, ItemStack itemStack, boolean customItemStack)
     {
         if (!this.hasBiome(biome))
         {
-            return OperationStatus.NO_BIOME;
+            return false;
         }
 
         final boolean flag = !customItemStack &&
@@ -102,12 +102,12 @@ public class DropsManager
 
         if (flag)
         {
-            return OperationStatus.NOTHING_TO_ADD;
+            return false;
         }
 
         if (itemStack.getType().isAir())
         {
-            return OperationStatus.ITEMSTACK_IS_AIR;
+            return false;
         }
 
         final List<UnmodifiableConfig> drops = this.fileConfig.get("drops." + biome.toString());
@@ -132,14 +132,14 @@ public class DropsManager
 
         this.fileConfig.set("drops." + biome.toString(), drops);
 
-        return OperationStatus.SUCCESS;
+        return true;
     }
 
-    public OperationStatus removeDropByItemStack(Biome biome, ItemStack itemStack)
+    public boolean removeDropByItemStack(Biome biome, ItemStack itemStack)
     {
         if (!this.hasBiome(biome))
         {
-            return OperationStatus.NO_BIOME;
+            return false;
         }
 
         final List<UnmodifiableConfig> drops = this.fileConfig.get("drops." + biome.toString());
@@ -162,32 +162,27 @@ public class DropsManager
 
         this.fileConfig.set("drops." + biome.toString(), drops);
 
-        return removed ? OperationStatus.SUCCESS : OperationStatus.NOTHING_TO_REMOVE;
+        return removed;
     }
 
-    public OperationStatus removeDropByIndex(Biome biome, int index)
+    public boolean removeDropByIndex(Biome biome, int index)
     {
         if (!this.hasBiome(biome))
         {
-            return OperationStatus.NO_BIOME;
+            return false;
         }
 
         final List<UnmodifiableConfig> drops = this.fileConfig.get("drops." + biome.toString());
 
         if (!Range.between(0, drops.size() - 1).contains(index))
         {
-            return OperationStatus.NOTHING_TO_REMOVE;
+            return false;
         }
 
         drops.remove(index);
 
         this.fileConfig.set("drops." + biome.toString(), drops);
 
-        return OperationStatus.SUCCESS;
-    }
-
-    public enum OperationStatus
-    {
-        SUCCESS, NO_BIOME, NOTHING_TO_ADD, NOTHING_TO_REMOVE, ITEMSTACK_IS_AIR
+        return true;
     }
 }

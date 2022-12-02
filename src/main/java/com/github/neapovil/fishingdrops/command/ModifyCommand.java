@@ -11,7 +11,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import com.github.neapovil.fishingdrops.FishingDrops;
-import com.github.neapovil.fishingdrops.manager.DropsManager.OperationStatus;
 
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
@@ -96,9 +95,9 @@ public class ModifyCommand implements ICommand
 
             final ItemStack itemstack = ((Player) sender).getInventory().getItemInMainHand();
 
-            final OperationStatus status = plugin.getDropsManager().addDrop(biome, itemstack, true);
+            final boolean status = plugin.getDropsManager().addDrop(biome, itemstack, true);
 
-            if (status.equals(OperationStatus.SUCCESS))
+            if (status)
             {
                 sender.sendMessage(Component.text("Custom item added: ").append(itemstack.displayName()));
             }
@@ -112,9 +111,9 @@ public class ModifyCommand implements ICommand
         {
             final ItemStack itemstack = (ItemStack) args[2];
 
-            final OperationStatus status = plugin.getDropsManager().addDrop(biome, itemstack, false);
+            final boolean status = plugin.getDropsManager().addDrop(biome, itemstack, false);
 
-            if (status.equals(OperationStatus.SUCCESS))
+            if (status)
             {
                 sender.sendMessage(Component.text("Generic item added: ").append(itemstack.displayName()));
             }
@@ -128,11 +127,11 @@ public class ModifyCommand implements ICommand
         {
             final int index = (int) args[2];
 
-            final OperationStatus status = plugin.getDropsManager().removeDropByIndex(biome, index);
+            final boolean status = plugin.getDropsManager().removeDropByIndex(biome, index);
 
             plugin.getDropsManager().getDropsByBiome(biome);
 
-            if (status.equals(OperationStatus.SUCCESS))
+            if (status)
             {
                 sender.sendMessage(Component.text("Item index removed: " + index));
             }
