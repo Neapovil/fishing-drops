@@ -179,4 +179,60 @@ public class DropsManager
 
         return true;
     }
+
+    public boolean editWeightByIndex(Biome biome, int index, int weight)
+    {
+        if (!this.hasBiome(biome))
+        {
+            return false;
+        }
+
+        final List<UnmodifiableConfig> drops = this.fileConfig.get("drops." + biome.toString());
+
+        if (index >= drops.size())
+        {
+            return false;
+        }
+
+        final Config config = Config.copy(drops.get(index));
+
+        config.set("weight", weight);
+
+        drops.set(index, config);
+
+        this.fileConfig.set("drops." + biome.toString(), drops);
+
+        return true;
+    }
+
+    public boolean editCountByIndex(Biome biome, int index, int minCount, int maxCount)
+    {
+        if (!this.hasBiome(biome))
+        {
+            return false;
+        }
+
+        final List<UnmodifiableConfig> drops = this.fileConfig.get("drops." + biome.toString());
+
+        if (index >= drops.size())
+        {
+            return false;
+        }
+
+        if (maxCount < minCount)
+        {
+            return false;
+        }
+
+        final Config config = Config.copy(drops.get(index));
+
+        config.set("count.min", minCount);
+        config.set("count.max", maxCount);
+
+        drops.set(index, config);
+
+        this.fileConfig.set("drops." + biome.toString(), drops);
+
+        return true;
+    }
 }

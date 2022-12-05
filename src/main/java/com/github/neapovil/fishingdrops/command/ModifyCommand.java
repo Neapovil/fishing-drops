@@ -57,16 +57,39 @@ public class ModifyCommand implements ICommand
                 .executes(this::run)
                 .register();
 
+        final Argument<Integer> indexargument = new IntegerArgument("index", 0).replaceSafeSuggestions(SafeSuggestions.suggest(info -> {
+            final Biome biome = (Biome) info.previousArgs()[0];
+            final int dropsize = plugin.getDropsManager().getDropsByBiome(biome).size();
+
+            return IntStream.range(0, dropsize).boxed().toArray(Integer[]::new);
+        }));
+
         new CommandAPICommand(this.commandName())
                 .withPermission(this.permission())
                 .withArguments(arguments)
                 .withArguments(new MultiLiteralArgument("removeDrop"))
-                .withArguments(new IntegerArgument("index", 0).replaceSafeSuggestions(SafeSuggestions.suggest(info -> {
-                    final Biome biome = (Biome) info.previousArgs()[0];
-                    final int dropsize = plugin.getDropsManager().getDropsByBiome(biome).size();
+                .withArguments(indexargument)
+                .executes(this::run)
+                .register();
 
-                    return IntStream.range(0, dropsize).boxed().toArray(Integer[]::new);
-                })))
+        new CommandAPICommand(this.commandName())
+                .withPermission(this.permission())
+                .withArguments(arguments)
+                .withArguments(new MultiLiteralArgument("edit"))
+                .withArguments(indexargument)
+                .withArguments(new MultiLiteralArgument("weight"))
+                .withArguments(new IntegerArgument("newWeight", 1))
+                .executes(this::run)
+                .register();
+
+        new CommandAPICommand(this.commandName())
+                .withPermission(this.permission())
+                .withArguments(arguments)
+                .withArguments(new MultiLiteralArgument("edit"))
+                .withArguments(indexargument)
+                .withArguments(new MultiLiteralArgument("count"))
+                .withArguments(new IntegerArgument("min", 1))
+                .withArguments(new IntegerArgument("max", 1))
                 .executes(this::run)
                 .register();
     }
@@ -130,14 +153,49 @@ public class ModifyCommand implements ICommand
 
             final List<WeightedItem> drops = plugin.getDropsManager().getDropsByBiome(biome);
 
-            if (index >= drops.size())
+            final boolean removed = plugin.getDropsManager().removeDropByIndex(biome, index);
+
+            if (!removed)
             {
                 throw CommandAPI.fail("Item can't be removed. Be sure it exist.");
             }
 
-            plugin.getDropsManager().removeDropByIndex(biome, index);
-
             sender.sendMessage(Component.text("Item removed: ").append(drops.get(index).itemStack().displayName()));
+        }
+
+        if (operation.equals("edit"))
+        {
+            final int index = (int) args[2];
+            final String editoperation = (String) args[3];
+
+            if (editoperation.equals("weight"))
+            {
+                final int weight = (int) args[4];
+
+                final boolean edited = plugin.getDropsManager().editWeightByIndex(biome, index, weight);
+
+                if (!edited)
+                {
+                    throw CommandAPI.fail("Unable to edit item. Please check the parameters.");
+                }
+
+                sender.sendMessage("New item weight: " + weight);
+            }
+
+            if (editoperation.equals("count"))
+            {
+                final int mincount = (int) args[4];
+                final int maxcount = (int) args[5];
+
+                final boolean edited = plugin.getDropsManager().editCountByIndex(biome, index, mincount, maxcount);
+
+                if (!edited)
+                {
+                    throw CommandAPI.fail("Unable to edit item. Please check the parameters.");
+                }
+
+                sender.sendMessage("New item counts: " + mincount + " min" + maxcount + " max");
+            }
         }
     }
 }
