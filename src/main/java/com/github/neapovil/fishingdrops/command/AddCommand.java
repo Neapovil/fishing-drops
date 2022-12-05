@@ -43,7 +43,7 @@ public class AddCommand implements ICommand
                         throw CommandAPI.fail("This biome was already added!");
                     }
 
-                    plugin.getDropsManager().add(biome);
+                    plugin.getDropsManager().addBiome(biome);
 
                     sender.sendMessage("New biome added: " + biome.toString());
                 })

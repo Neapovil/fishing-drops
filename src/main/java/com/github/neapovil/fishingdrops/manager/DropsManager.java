@@ -60,7 +60,7 @@ public class DropsManager
         return this.fileConfig.get("drops." + biome.toString()) != null;
     }
 
-    public boolean add(Biome biome)
+    public boolean addBiome(Biome biome)
     {
         if (this.hasBiome(biome))
         {
@@ -72,7 +72,7 @@ public class DropsManager
         return true;
     }
 
-    public boolean remove(Biome biome)
+    public boolean removeBiome(Biome biome)
     {
         if (!this.hasBiome(biome))
         {
@@ -215,6 +215,11 @@ public class DropsManager
         final List<UnmodifiableConfig> drops = this.fileConfig.get("drops." + biome.toString());
 
         if (index >= drops.size())
+        {
+            return false;
+        }
+
+        if (minCount <= 0 || maxCount <= 0)
         {
             return false;
         }
