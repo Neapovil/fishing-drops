@@ -28,28 +28,25 @@ public class DropsManager
 
         final List<UnmodifiableConfig> data = this.fileConfig.get("drops." + biome.toString());
 
-        if (data != null)
+        for (UnmodifiableConfig i : data)
         {
-            for (UnmodifiableConfig i : data)
+            final String item = i.get("item");
+            final String material = i.get("material");
+            final int weight = i.getInt("weight");
+            final int countmin = i.getInt("count.min");
+            final int countmax = i.getInt("count.max");
+
+            final WeightedItem weighteditem = new WeightedItem(Material.getMaterial(material), weight, countmin, countmax);
+
+            try
             {
-                final String item = i.get("item");
-                final String material = i.get("material");
-                final int weight = i.getInt("weight");
-                final int countmin = i.getInt("count.min");
-                final int countmax = i.getInt("count.max");
-
-                final WeightedItem weighteditem = new WeightedItem(Material.getMaterial(material), weight, countmin, countmax);
-
-                try
-                {
-                    weighteditem.itemStack(ItemStack.deserializeBytes(Base64.getDecoder().decode(item)));
-                }
-                catch (Exception e)
-                {
-                }
-
-                drops.add(weighteditem);
+                weighteditem.itemStack(ItemStack.deserializeBytes(Base64.getDecoder().decode(item)));
             }
+            catch (Exception e)
+            {
+            }
+
+            drops.add(weighteditem);
         }
 
         return drops;
