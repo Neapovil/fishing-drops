@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 
 import com.github.neapovil.fishingdrops.FishingDrops;
 import com.github.neapovil.fishingdrops.Keys;
+import com.github.neapovil.fishingdrops.object.WeightedItem;
 
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
@@ -49,25 +50,32 @@ public class ViewCommand implements ICommand
                     final Component title = Component.text(biome.toString() + "'s Loot Table");
                     final Inventory inventory = plugin.getServer().createInventory(null, 54, title);
 
-                    final List<ItemStack> items = plugin.getDropsManager().getDropsByBiome(biome)
+                    final List<WeightedItem> items = plugin.getDropsManager().getDropsByBiome(biome)
                             .stream()
-                            .map(i -> i.itemStack())
                             .toList();
 
                     for (int i = 0; i < items.size(); i++)
                     {
-                        final ItemStack itemstack = items.get(i);
+                        final WeightedItem weighteditem = items.get(i);
+                        final ItemStack itemstack = weighteditem.itemStack();
 
                         final int index = i;
                         itemstack.editMeta(i1 -> {
                             final List<Component> lore = new ArrayList<>();
 
+                            final Style style = Style.empty().color(NamedTextColor.GOLD);
+
+                            lore.add(Component.text("----"));
+                            lore.add(Component.text("(Remove index: " + index + ")", style));
+                            lore.add(Component.text("Weight: " + weighteditem.weight(), style));
+                            lore.add(Component.text("Min Count: " + weighteditem.minCount(), style));
+                            lore.add(Component.text("Max Count: " + weighteditem.maxCount(), style));
+                            lore.add(Component.text("----"));
+
                             if (i1.hasLore())
                             {
                                 lore.addAll(i1.lore());
                             }
-
-                            lore.add(0, Component.text("(Remove index: " + index + ")", Style.empty().color(NamedTextColor.GOLD)));
 
                             i1.lore(lore);
                         });
